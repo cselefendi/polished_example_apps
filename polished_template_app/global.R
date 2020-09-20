@@ -5,7 +5,7 @@ library(config)
 app_config <- config::get()
 
 global_sessions_config(
-  app_name = "02_custom_sign_in",
+  app_name = "template_app",
   api_key = app_config$api_key
 )
 

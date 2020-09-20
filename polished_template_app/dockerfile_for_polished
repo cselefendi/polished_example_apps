@@ -1,0 +1,38 @@
+FROM rocker/tidyverse:3.6.3
+
+RUN apt-get update -qq && apt-get -y --no-install-recommends install
+
+RUN install2.r --error \
+    shiny \
+	polished
+	
+RUN mkdir /bszu/
+RUN mkdir /bszu/mavir_mek_api/
+RUN mkdir /bszu/mavir_mek_api/temp/
+
+WORKDIR /bszu/mavir_mek_api
+COPY api_mavir_mek_v1.R api_mavir_mek_v1.R
+COPY db.R db.R
+COPY run_collect_menetrend_statuszok_job.R run_collect_menetrend_statuszok_job.R
+COPY run_update_menetrend_history_job.R run_update_menetrend_history_job.R
+
+RUN ls
+
+RUN ln -fs /usr/share/zoneinfo/Europe/Budapest /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
+
+EXPOSE 9901
+
+CMD ["R", "-e", "pr <- plumber::plumb('/bszu/mavir_mek_api/api_mavir_mek_v1.R'); pr$run(host='0.0.0.0', port=9901, swagger = F)"]
+
+# cd /bszu/mavir_mek_api
+# docker image build -t bszu_mavirmek -f mavir_mek_api_dockerfile .
+
+# cd /bszu/mavir_mek_api
+# docker container run --rm -it -p 9901:9901 bszu_mavirmek
+
+# cd /bszu/mavir_mek_api
+# docker container run -d -p 9901:9901 --name bszu_mavirmek_1 bszu_mavirmek
+
+#cd /bszu/mavir_mek_api
+#docker image build -t bszu_mavirmek -f mavir_mek_api_dockerfile .
+#docker container run -d -p 9901:9901 --name bszu_mavirmek_1 bszu_mavirmek
